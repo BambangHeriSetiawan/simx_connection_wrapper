@@ -1,15 +1,14 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/legacy.dart';
 import 'package:http/http.dart' as http;
 
-enum InternetConnectionStatus { connected, disconnected }
+enum InternetConnectionStatus { connected, disconnected, connecting }
 
 class InternetConnectionNotifier
     extends StateNotifier<InternetConnectionStatus> {
-  InternetConnectionNotifier() : super(InternetConnectionStatus.disconnected) {
+  InternetConnectionNotifier() : super(InternetConnectionStatus.connected) {
     _startListening();
   }
 
@@ -32,9 +31,9 @@ class InternetConnectionNotifier
     }
 
   Future<void> _checkInternetConnectivity() async {
+    state = InternetConnectionStatus.connecting;
     try {
       final connectivityResult = await _connectivity.checkConnectivity();
-      debugPrint('Connectivity Result: $connectivityResult');
       // Jika tidak ada koneksi jaringan
       if (connectivityResult == ConnectivityResult.none) {
         state = InternetConnectionStatus.disconnected;
@@ -43,7 +42,7 @@ class InternetConnectionNotifier
 
       // Coba akses ke internet dengan HTTP ping
       final response = await _httpClient.get(
-        Uri.parse('https://httpbin.org/get'),
+        Uri.parse('https://google.com'),
         headers: {'User-Agent': 'FlutterApp/1.0'},
       );
 
